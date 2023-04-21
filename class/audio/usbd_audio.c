@@ -76,7 +76,7 @@ static int audio_class_endpoint_request_handler(struct usb_setup_packet *setup, 
                 }
                 break;
             case AUDIO_REQUEST_GET_CUR:
-                sampling_freq = 16000;
+                sampling_freq = 48000;
                 memcpy(*data, &sampling_freq, 4);
                 *len = 4;
                 USB_LOG_DBG("Get ep:%02x %d Hz\r\n", ep, (int)sampling_freq);
