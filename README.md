@@ -50,7 +50,7 @@ CherryUSB Device Stack provides a unified framework of functions for standard de
 
 CherryUSB Device Stack has the following functions：
 
-- Support USB2.0 full and high speed
+- Support USB2.0 full and high speed, USB3.0 super speed
 - Support endpoint irq callback register by users, let users do whatever they wants in endpoint irq callback.
 - Support Composite Device
 - Support Communication Device Class (CDC)
@@ -100,7 +100,7 @@ CherryUSB Host Stack resource usage (GCC 10.2 with -O2):
 |   file        |  FLASH (Byte)  |  No Cache RAM (Byte)            |  RAM (Byte)                 |  Heap (Byte)                    |
 |:-------------:|:--------------:|:-------------------------------:|:---------------------------:|:-------------------------------:|
 |usbh_core.c    |  4417          | 512                             | 28                          | sizeof(struct usbh_urb)         |
-|usbh_hub.c     |  4895          | 32 + 1* (1+n) | 16 + sizeof(struct usbh_hub) * (1+n)          | 0                               |
+|usbh_hub.c     |  4895          | 32 + 4* (1+n) | 16 + sizeof(struct usbh_hub) * (1+n)          | 0                               |
 |usbh_cdc_acm.c |  1064          | 7                               | 4                           | sizeof(struct usbh_cdc_acm) * x |
 |usbh_msc.c     |  1776          | 32                              | 4                           | sizeof(struct usbh_msc) * x     |
 |usbh_hid.c     |  922           | 128                             | 4                           | sizeof(struct usbh_hid) * x     |
@@ -139,17 +139,16 @@ Note: After version 0.4.1, the dcd drivers have been refactored and some reposit
 |ST    |  STM32F103C8T6 | fsdev |[stm32f103_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32f103c8t6)|latest |
 |ST    |  STM32F4 | dwc2 |[stm32f429_device_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32f429igt6)   [stm32f429_host_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_host/stm32f429igt6)|latest |
 |ST    |  STM32H7 | dwc2 |[stm32h743_device_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32h743vbt6)   [stm32h743_host_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_host/stm32h743xih6)|latest |
-|HPMicro    |  HPM6750 | hpm/ehci |[hpm_repo](https://github.com/CherryUSB/cherryusb_hpmicro)|v0.6.0 |
+|HPMicro    |  HPM6750 | hpm/ehci |[hpm_repo](https://github.com/CherryUSB/cherryusb_hpmicro)|v0.7.0 |
 |Essemi    |  ES32F36xx | musb |[es32f369_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/es32)|latest |
 |AllwinnerTech    |  F1C100S | musb |[cherryusb_rtt_f1c100s](https://github.com/CherryUSB/cherryusb_rtt_f1c100s)|latest |
-|Phytium |  e2000 | xhci |[phytium _repo](https://gitee.com/phytium_embedded/phytium-standalone-sdk)|latest |
+|Phytium |  e2000 | xhci |[phytium _repo](https://gitee.com/phytium_embedded/phytium-free-rtos-sdk)|latest |
 |Raspberry pi |  rp2040 | rp2040 |[rp2040_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/rp2040)|latest |
 |WCH    |  CH32V307/ch58x | ch32_usbfs/ch32_usbhs/ch58x |[wch_repo](https://github.com/CherryUSB/cherryusb_wch)|latest |
 |Nordicsemi |  Nrf52840 | nrf5x |[nrf5x_repo](https://github.com/CherryUSB/cherryusb_nrf5x)|latest |
 |Nuvoton    |  Nuc442 | nuvoton |[nuc442_repo](https://github.com/CherryUSB/cherryusb_nuc442)|v0.4.1 |
 |Geehy    |  APM32E10x APM32F0xx| fsdev |[apm32_repo](https://github.com/CherryUSB/cherryusb_apm32)|v0.4.1 |
 |Espressif    |  esp32 | dwc2 |[esp32_repo](https://github.com/CherryUSB/cherryusb_esp32)|v0.4.1 |
-|Mindmotion    |  MM32L3xx | mm32 |[mm32_repo](https://github.com/CherryUSB/cherryusb_mm32)|v0.4.1 |
 
 ## Contact
 
