@@ -187,10 +187,31 @@ USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t write_buffer[2048];
 
 volatile bool ep_tx_busy_flag = false;
 
-void usbd_configure_done_callback(void)
+void usbd_event_handler(uint8_t event)
 {
-    /* setup first out ep read transfer */
-    usbd_ep_start_read(WINUSB_OUT_EP, read_buffer, 2048);
+    switch (event) {
+        case USBD_EVENT_RESET:
+            break;
+        case USBD_EVENT_CONNECTED:
+            break;
+        case USBD_EVENT_DISCONNECTED:
+            break;
+        case USBD_EVENT_RESUME:
+            break;
+        case USBD_EVENT_SUSPEND:
+            break;
+        case USBD_EVENT_CONFIGURED:
+            /* setup first out ep read transfer */
+            usbd_ep_start_read(WINUSB_OUT_EP, read_buffer, 2048);
+            break;
+        case USBD_EVENT_SET_REMOTE_WAKEUP:
+            break;
+        case USBD_EVENT_CLR_REMOTE_WAKEUP:
+            break;
+
+        default:
+            break;
+    }
 }
 
 void usbd_winusb_out(uint8_t ep, uint32_t nbytes)
@@ -200,17 +221,18 @@ void usbd_winusb_out(uint8_t ep, uint32_t nbytes)
     //     printf("%02x ", read_buffer[i]);
     // }
     // printf("\r\n");
+	usbd_ep_start_write(WINUSB_IN_EP, read_buffer, nbytes);
     /* setup next out ep read transfer */
-    usbd_ep_start_read(CDC_OUT_EP, read_buffer, 2048);
+    usbd_ep_start_read(WINUSB_OUT_EP, read_buffer, 2048);
 }
 
 void usbd_winusb_in(uint8_t ep, uint32_t nbytes)
 {
     USB_LOG_RAW("actual in len:%d\r\n", nbytes);
 
-    if ((nbytes % CDC_MAX_MPS) == 0 && nbytes) {
+    if ((nbytes % WINUSB_EP_MPS) == 0 && nbytes) {
         /* send zlp */
-        usbd_ep_start_write(CDC_IN_EP, NULL, 0);
+        usbd_ep_start_write(WINUSB_IN_EP, NULL, 0);
     } else {
         ep_tx_busy_flag = false;
     }

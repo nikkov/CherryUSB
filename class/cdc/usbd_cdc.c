@@ -16,6 +16,7 @@ static int cdc_acm_class_interface_request_handler(struct usb_setup_packet *setu
                 setup->bRequest);
 
     struct cdc_line_coding line_coding;
+    struct cdc_line_coding line_coding_last;
     bool dtr, rts;
     uint8_t intf_num = LO_BYTE(setup->wIndex);
 
@@ -46,10 +47,11 @@ static int cdc_acm_class_interface_request_handler(struct usb_setup_packet *setu
                         line_coding.bDataBits,
                         parity_name[line_coding.bParityType],
                         stop_name[line_coding.bCharFormat]);
+
             usbd_cdc_acm_set_line_coding(intf_num, &line_coding);
             break;
 
-        case CDC_REQUEST_SET_CONTROL_LINE_STATE: {
+        case CDC_REQUEST_SET_CONTROL_LINE_STATE:
             dtr = (setup->wValue & 0x0001);
             rts = (setup->wValue & 0x0002);
             USB_LOG_DBG("Set intf:%d DTR 0x%x,RTS 0x%x\r\n",
@@ -58,7 +60,7 @@ static int cdc_acm_class_interface_request_handler(struct usb_setup_packet *setu
                         rts);
             usbd_cdc_acm_set_dtr(intf_num, dtr);
             usbd_cdc_acm_set_rts(intf_num, rts);
-        } break;
+            break;
 
         case CDC_REQUEST_GET_LINE_CODING:
             usbd_cdc_acm_get_line_coding(intf_num, &line_coding);
@@ -71,7 +73,9 @@ static int cdc_acm_class_interface_request_handler(struct usb_setup_packet *setu
                         line_coding.bParityType,
                         line_coding.bDataBits);
             break;
-
+        case CDC_REQUEST_SEND_BREAK:
+            usbd_cdc_acm_send_break(intf_num);
+            break;
         default:
             USB_LOG_WRN("Unhandled CDC Class bRequest 0x%02x\r\n", setup->bRequest);
             return -1;
@@ -107,5 +111,9 @@ __WEAK void usbd_cdc_acm_set_dtr(uint8_t intf, bool dtr)
 }
 
 __WEAK void usbd_cdc_acm_set_rts(uint8_t intf, bool rts)
+{
+}
+
+__WEAK void usbd_cdc_acm_send_break(uint8_t intf)
 {
 }

@@ -2,19 +2,37 @@
 
 [中文版](./README_zh.md)
 
-CherryUSB is a tiny, beautiful and portable USB host and device stack for embedded system with USB ip.
+CherryUSB is a tiny, beautiful and portable USB host and device stack for embedded system with USB IP.
 
 ![CherryUSB](./docs/assets/usb_outline.png)
 
 ## Why choose
 
-- Streamlined code with small memory usage which also can be further trimmed
-- Comprehensive class drivers and all master and slave class drivers are templated,making it easy for users to add new class drivers and find patterns when learning
-- The APIs available to the users are very few and clearly categorised. Device: initialisation + registration apis, command callback apis, data sending and receiving apis; Host: initialisation + lookup apis, data sending and receiving apis
-- Tree-based programming with a hierarchy of code that makes it easy for the user to sort out function call relationships, enumerations and class-driven loading processes
-- Standardised porting interface, no need to rewrite the driver for the same ip, and porting drivers are templated to make it easier for users to add new ports
-- The use of the device or host transceiver apis are equivalent to the use of the uart tx/rx dma, and there is no limit to the length
-- Capable of achieving theoretical USB hardware bandwidth
+### Easy to study USB
+
+In order to make it easier for users to learn USB basics, enumeration, driver loading and IP drivers, the code has been written with the following advantages:
+
+- Lean code, simple logic, no complex C syntax
+- Tree-based programming with cascading code
+- Class-drivers and porting-drivers are templating and simplification
+- Clear API classification (slave: initialisation, registration api, command callback api, data sending and receiving api; host: initialisation, lookup api, data sending and receiving api)
+
+### Easy to use  USB
+
+In order to facilitate the use of the USB interface and to take into account the fact that users have learned about uart and dma, the following advantages have been designed for the data sending and receiving class of interface:
+
+- Equivalent to using uart tx dma/uart rx dma
+- There is no limit to the length of send and receive, the user does not need to care about the USB packetization process (the porting driver does the packetization process)
+
+### Easy to bring out USB performance
+
+Taking into account USB performance issues and trying to achieve the theoretical bandwidth of the USB hardware, the design of the data transceiver class interface has the following advantages:
+
+- Porting drivers directly to registers, no abstraction layer encapsulation
+- Memory zero copy
+- If IP has DMA then uses DMA mode (DMA with hardware packetization)
+- Unlimited length make it easier to interface with hardware DMA and take advantage of DMA
+- Subcontracting function is handled in interrupt
 
 ## Directoy Structure
 
@@ -36,13 +54,12 @@ CherryUSB is a tiny, beautiful and portable USB host and device stack for embedd
 |:-------------:|:---------------------------:|
 |class          |  usb class driver           |
 |common         |  usb spec macros and utils  |
-|core           |  usb core implementation  |
-|demo           |  different chips demo     |
-|osal           |  os wrapper              |
-|docs           |  doc for guiding         |
-|packet capture |  packet capture file     |
-|port           |  usb dcd and hcd porting |
-|tools           |  tool used url          |
+|core           |  usb core implementation    |
+|demo           |  different chips demo       |
+|osal           |  os wrapper                 |
+|docs           |  doc for guiding            |
+|port           |  usb dcd and hcd porting    |
+|tools          |  tool url                   |
 
 ## Device Stack Overview
 
@@ -131,24 +148,23 @@ USB basic concepts and how the CherryUSB Device stack is implemented, see [Cherr
 
 ## Demo Repo
 
-Note: After version 0.4.1, the dcd drivers have been refactored and some repositories are not maintained for a long time, so if you use a higher version, you need to update it yourself.
-
 |   Manufacturer       |  CHIP or Series    | USB IP| Repo Url |Corresponds to master version|
 |:--------------------:|:------------------:|:-----:|:--------:|:---------------------------:|
-|Bouffalolab    |  BL702/BL616/BL808 | bouffalolab/ehci|[bl_mcu_sdk](https://github.com/CherryUSB/cherryusb_bouffalolab)| latest |
-|ST    |  STM32F103C8T6 | fsdev |[stm32f103_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32f103c8t6)|latest |
-|ST    |  STM32F4 | dwc2 |[stm32f429_device_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32f429igt6)   [stm32f429_host_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_host/stm32f429igt6)|latest |
-|ST    |  STM32H7 | dwc2 |[stm32h743_device_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_device/stm32h743vbt6)   [stm32h743_host_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/stm32/usb_host/stm32h743xih6)|latest |
-|HPMicro    |  HPM6750 | hpm/ehci |[hpm_repo](https://github.com/CherryUSB/cherryusb_hpmicro)|v0.7.0 |
-|Essemi    |  ES32F36xx | musb |[es32f369_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/es32)|latest |
-|AllwinnerTech    |  F1C100S | musb |[cherryusb_rtt_f1c100s](https://github.com/CherryUSB/cherryusb_rtt_f1c100s)|latest |
-|Phytium |  e2000 | xhci |[phytium _repo](https://gitee.com/phytium_embedded/phytium-free-rtos-sdk)|latest |
-|Raspberry pi |  rp2040 | rp2040 |[rp2040_repo](https://github.com/sakumisu/CherryUSB/tree/master/demo/rp2040)|latest |
+|Bouffalolab    |  BL702/BL616/BL808 | bouffalolab/ehci|[bouffalo_sdk](https://github.com/CherryUSB/cherryusb_bouffalolab)| latest |
+|ST    |  STM32F1x | fsdev |[stm32_repo](https://github.com/CherryUSB/cherryusb_stm32)|latest |
+|ST    |  STM32F4/STM32H7 | dwc2 |[stm32_repo](https://github.com/CherryUSB/cherryusb_stm32)|latest |
+|HPMicro    |  HPM6750 | hpm/ehci |[hpm_sdk](https://github.com/CherryUSB/cherryusb_hpmicro)|v0.7.0 |
+|Essemi    |  ES32F36xx | musb |[es32f369_repo](https://github.com/CherryUSB/cherryusb_es32)|latest |
+|AllwinnerTech    |  F1C100S/F1C200S | musb |[cherryusb_rtt_f1c100s](https://github.com/CherryUSB/cherryusb_rtt_f1c100s)|latest |
+|Phytium |  e2000 | xhci |[phytium_repo](https://gitee.com/phytium_embedded/phytium-free-rtos-sdk)|latest |
+|Raspberry pi |  rp2040 | rp2040 |[pico-examples](https://github.com/CherryUSB/pico-examples)|latest |
 |WCH    |  CH32V307/ch58x | ch32_usbfs/ch32_usbhs/ch58x |[wch_repo](https://github.com/CherryUSB/cherryusb_wch)|latest |
 |Nordicsemi |  Nrf52840 | nrf5x |[nrf5x_repo](https://github.com/CherryUSB/cherryusb_nrf5x)|latest |
+|Espressif    |  esp32s3 | dwc2 |[esp32_repo](https://github.com/CherryUSB/cherryusb_esp32)|latest |
+|Bekencorp    |  BK72xx | musb |[armino](https://github.com/CherryUSB/armino)|v0.7.0 |
+|Sophgo    |  cv18xx | dwc2 |[cvi_alios_open](https://github.com/CherryUSB/cvi_alios_open)|v0.7.0 |
 |Nuvoton    |  Nuc442 | nuvoton |[nuc442_repo](https://github.com/CherryUSB/cherryusb_nuc442)|v0.4.1 |
 |Geehy    |  APM32E10x APM32F0xx| fsdev |[apm32_repo](https://github.com/CherryUSB/cherryusb_apm32)|v0.4.1 |
-|Espressif    |  esp32 | dwc2 |[esp32_repo](https://github.com/CherryUSB/cherryusb_esp32)|v0.4.1 |
 
 ## Contact
 

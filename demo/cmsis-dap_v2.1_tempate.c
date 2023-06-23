@@ -116,7 +116,7 @@ const uint8_t daplink_descriptor[] = {
     USB_ENDPOINT_DESCRIPTOR_INIT(DAP_IN_EP, USB_ENDPOINT_TYPE_BULK, CDC_MAX_MPS, 0x00),
     /* Endpoint IN 2 */
     USB_ENDPOINT_DESCRIPTOR_INIT(DAP_OUT_EP, USB_ENDPOINT_TYPE_BULK, CDC_MAX_MPS, 0x00),
-    CDC_ACM_DESCRIPTOR_INIT(0x01, CDC_INT_EP, CDC_OUT_EP, CDC_IN_EP, 0x00),
+    CDC_ACM_DESCRIPTOR_INIT(0x01, CDC_INT_EP, CDC_OUT_EP, CDC_IN_EP, CDC_MAX_MPS, 0x00),
     /* String 0 (LANGID) */
     USB_LANGID_INIT(USBD_LANGID_STRING),
     /* String 1 (Manufacturer) */
@@ -192,11 +192,32 @@ USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t USB_Response[DAP_PACKET_SIZE];
 
 volatile bool ep_tx_busy_flag = false;
 
-void usbd_configure_done_callback(void)
+void usbd_event_handler(uint8_t event)
 {
-    /* setup first out ep read transfer */
-    usbd_ep_start_read(CDC_OUT_EP, cdc_read_buffer, CDC_MAX_MPS);
-    usbd_ep_start_read(DAP_OUT_EP, USB_Request, DAP_PACKET_SIZE);
+    switch (event) {
+        case USBD_EVENT_RESET:
+            break;
+        case USBD_EVENT_CONNECTED:
+            break;
+        case USBD_EVENT_DISCONNECTED:
+            break;
+        case USBD_EVENT_RESUME:
+            break;
+        case USBD_EVENT_SUSPEND:
+            break;
+        case USBD_EVENT_CONFIGURED:
+            /* setup first out ep read transfer */
+            usbd_ep_start_read(CDC_OUT_EP, cdc_read_buffer, CDC_MAX_MPS);
+            usbd_ep_start_read(DAP_OUT_EP, USB_Request, DAP_PACKET_SIZE);
+            break;
+        case USBD_EVENT_SET_REMOTE_WAKEUP:
+            break;
+        case USBD_EVENT_CLR_REMOTE_WAKEUP:
+            break;
+
+        default:
+            break;
+    }
 }
 
 void usbd_cdc_acm_bulk_out(uint8_t ep, uint32_t nbytes)

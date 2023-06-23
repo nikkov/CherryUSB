@@ -66,7 +66,7 @@ struct dwc2_hcd {
 
 static inline int dwc2_reset(void)
 {
-    uint32_t count = 0U;
+    volatile uint32_t count = 0U;
 
     /* Wait for AHB master IDLE state. */
     do {
@@ -127,7 +127,7 @@ static inline void dwc2_set_mode(uint8_t mode)
 
 static inline int dwc2_flush_rxfifo(void)
 {
-    uint32_t count = 0;
+    volatile uint32_t count = 0;
 
     USB_OTG_GLB->GRSTCTL = USB_OTG_GRSTCTL_RXFFLSH;
 
@@ -142,7 +142,7 @@ static inline int dwc2_flush_rxfifo(void)
 
 static inline int dwc2_flush_txfifo(uint32_t num)
 {
-    uint32_t count = 0U;
+    volatile uint32_t count = 0U;
 
     USB_OTG_GLB->GRSTCTL = (USB_OTG_GRSTCTL_TXFFLSH | (num << 6));
 
@@ -274,13 +274,6 @@ static inline void dwc2_pipe_transfer(uint8_t ch_num, uint8_t ep_addr, uint32_t 
     is_oddframe = (((uint32_t)USB_OTG_HOST->HFNUM & 0x01U) != 0U) ? 0U : 1U;
     USB_OTG_HC(ch_num)->HCCHAR &= ~USB_OTG_HCCHAR_ODDFRM;
     USB_OTG_HC(ch_num)->HCCHAR |= (uint32_t)is_oddframe << 29;
-
-    /* make sure to set the correct ep direction */
-    if (ep_addr & 0x80) {
-        tmpreg |= USB_OTG_HCCHAR_EPDIR;
-    } else {
-        tmpreg &= ~USB_OTG_HCCHAR_EPDIR;
-    }
 
     /* Set host channel enable */
     tmpreg = USB_OTG_HC(ch_num)->HCCHAR;
@@ -465,7 +458,15 @@ int usb_hc_init(void)
 
     usb_hc_low_level_init();
 
-    if ((USB_OTG_GLB->CID & (0x1U << 8)) == 0U) {
+    USB_LOG_INFO("========== DWC2 params ==========\r\n");
+    USB_LOG_INFO("CID:%08x\r\n",USB_OTG_GLB->CID);
+    USB_LOG_INFO("GSNPSID:%08x\r\n",USB_OTG_GLB->GSNPSID);
+    USB_LOG_INFO("GHWCFG1:%08x\r\n",USB_OTG_GLB->GHWCFG1);
+    USB_LOG_INFO("GHWCFG2:%08x\r\n",USB_OTG_GLB->GHWCFG2);
+    USB_LOG_INFO("GHWCFG3:%08x\r\n",USB_OTG_GLB->GHWCFG3);
+    USB_LOG_INFO("GHWCFG4:%08x\r\n",USB_OTG_GLB->GHWCFG4);
+
+    if ((USB_OTG_GLB->GHWCFG2 & (0x3U << 3)) == 0U) {
         USB_LOG_ERR("This dwc2 version does not support dma, so stop working\r\n");
         while (1) {
         }

@@ -9,7 +9,7 @@
 
 #define DEV_FORMAT "/dev/rndis"
 
-USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t g_rndis_buf[1024];
+USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t g_rndis_buf[4096];
 
 static int usbh_rndis_init_msg_transfer(struct usbh_rndis *rndis_class)
 {
@@ -81,7 +81,7 @@ int usbh_rndis_query_msg_transfer(struct usbh_rndis *rndis_class, uint32_t oid, 
     setup->wIndex = 0;
     setup->wLength = sizeof(rndis_query_msg_t);
 
-    ret = usbh_control_transfer(rndis_class->hport->ep0, setup, (uint8_t *)&cmd);
+    ret = usbh_control_transfer(rndis_class->hport->ep0, setup, (uint8_t *)cmd);
     if (ret < 0) {
         USB_LOG_ERR("oid:%08x send error, ret: %d\r\n", (unsigned int)oid, ret);
         return ret;
@@ -205,7 +205,7 @@ int usbh_rndis_keepalive(struct usbh_rndis *rndis_class)
     setup->wIndex = 0;
     setup->wLength = sizeof(rndis_keepalive_msg_t);
 
-    ret = usbh_control_transfer(rndis_class->hport->ep0, setup, (uint8_t *)&cmd);
+    ret = usbh_control_transfer(rndis_class->hport->ep0, setup, (uint8_t *)cmd);
     if (ret < 0) {
         USB_LOG_ERR("keepalive send error, ret: %d\r\n", ret);
         return ret;
@@ -259,14 +259,7 @@ static int usbh_rndis_connect(struct usbh_hubport *hport, uint8_t intf)
 
 #ifdef CONFIG_USBHOST_RNDIS_NOTIFY
     ep_desc = &hport->config.intf[intf].altsetting[0].ep[0].ep_desc;
-    ep_cfg.ep_addr = ep_desc->bEndpointAddress;
-    ep_cfg.ep_type = ep_desc->bmAttributes & USB_ENDPOINT_TYPE_MASK;
-    ep_cfg.ep_mps = ep_desc->wMaxPacketSize & USB_MAXPACKETSIZE_MASK;
-
-    ep_cfg.ep_interval = ep_desc->bInterval;
-    ep_cfg.hport = hport;
-    usbh_pipe_alloc(&rndis_class->intin, &ep_cfg);
-
+    usbh_hport_activate_epx(&rndis_class->intin, hport, ep_desc);
 #endif
     for (uint8_t i = 0; i < hport->config.intf[intf + 1].altsetting[0].intf_desc.bNumEndpoints; i++) {
         ep_desc = &hport->config.intf[intf + 1].altsetting[0].ep[i].ep_desc;
@@ -395,12 +388,13 @@ static int usbh_rndis_disconnect(struct usbh_hubport *hport, uint8_t intf)
             usbh_pipe_free(rndis_class->bulkout);
         }
 
-        usbh_rndis_stop(rndis_class);
+        if (hport->config.intf[intf].devname[0] != '\0') {
+            USB_LOG_INFO("Unregister RNDIS Class:%s\r\n", hport->config.intf[intf].devname);
+            usbh_rndis_stop(rndis_class);
+        }
+
         memset(rndis_class, 0, sizeof(struct usbh_rndis));
         usb_free(rndis_class);
-
-        if (hport->config.intf[intf].devname[0] != '\0')
-            USB_LOG_INFO("Unregister RNDIS Class:%s\r\n", hport->config.intf[intf].devname);
     }
 
     return ret;
